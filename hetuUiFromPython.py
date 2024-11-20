@@ -23,15 +23,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Kutsutaa käyttöliittymän muodostusmetodia setupUI
         self.ui.setupUi(self)
 
+        self.ui.printPushButton.setEnabled(False)
+
         # Kun poistutaan ssnLineEdit-elementistä suoritetaan barcodeLabel-elementin päivitys
         self.ui.ssnLineEdit.editingFinished.connect(self.updateBarcodeLabel)
-
+        self.ui.firstNameLineEdit_2.editingFinished.connect(self.beautyfyFirstName)
+        self.ui.LastNameLineEdit_2.editingFinished.connect(self.beautyfyLastName)
+        self.ui.printAmountspinBox.valueChanged.connect(self.enablePrintButton)
+        
     # OHJELMOIDUT SLOTIT
     # Viivakoodin muodostus ja barcodeLabel:n päivitys
     def updateBarcodeLabel(self):
         # Tarkistetaan, että henkilötunnus on oikein muodostettu
         uiSsn = self.ui.ssnLineEdit.text().upper() # Luetaan käyttöliittymästä henkilötunnus
         ssnToCheck = identityCheck2.NationalSSN(uiSsn) # Luodaan henkilötunnusobjekti
+        self.ui.ssnLineEdit.setText(uiSsn)
         # Jos se on oikein, luodaan viivakoodi
         if ssnToCheck.isValidSsn():
             barcode128 = barcode.Code128B(uiSsn) # Luodaan viivakoodi-olio
@@ -42,8 +48,25 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             self.errorTitle = 'Henkilötunnus virheellinen!'
             self.errorText = ssnToCheck.errorMessage
+            self.ui.ssnLineEdit.setFocus()
             self.openErrorMsgBox(self.errorTitle, self.errorText)
-        
+
+    def beautyfyFirstName(self):
+        firstName = self.ui.firstNameLineEdit_2.text()
+        firstName = firstName.strip() # Poistetaan ylimääräiset välit
+        firstName = firstName.title()
+        self.ui.firstNameLineEdit_2.setText(firstName) 
+
+    def beautyfyLastName(self):
+        lastName = self.ui.LastNameLineEdit_2.text()
+        lastName = lastName.strip().title()
+        self.ui.LastNameLineEdit_2.setText(lastName)
+
+    # Aktivoidaan tulostuspainike
+    def enablePrintButton(self):
+        if self.ui.ssnLineEdit.text != "":     
+            self.ui.printPushButton.setEnabled(True)
+
     # Avataan ErrorMessageBox
     def openErrorMsgBox(self, errorTitle, errorText):
         msgBox = QtWidgets.QMessageBox()
