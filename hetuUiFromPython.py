@@ -27,8 +27,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Kun poistutaan ssnLineEdit-elementistä suoritetaan barcodeLabel-elementin päivitys
         self.ui.ssnLineEdit.editingFinished.connect(self.updateBarcodeLabel)
-        self.ui.firstNameLineEdit_2.editingFinished.connect(self.beautyfyFirstName)
-        self.ui.LastNameLineEdit_2.editingFinished.connect(self.beautyfyLastName)
+        """self.ui.firstNameLineEdit_2.editingFinished.connect(self.beautyfyFirstName)
+        self.ui.LastNameLineEdit_2.editingFinished.connect(self.beautyfyLastName)"""
+        self.ui.firstNameLineEdit_2.editingFinished.connect(lambda: self.beautyfyElement(self.ui.firstNameLineEdit_2))
+        self.ui.LastNameLineEdit_2.editingFinished.connect(lambda: self.beautyfyElement(self.ui.LastNameLineEdit_2))
         self.ui.printAmountspinBox.valueChanged.connect(self.enablePrintButton)
         
     # OHJELMOIDUT SLOTIT
@@ -43,15 +45,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             barcode128 = barcode.Code128B(uiSsn) # Luodaan viivakoodi-olio
             barCodeToPrint = barcode128.buildBarcode() # Lisätään alku- ja loppumerkki sekä varmistussumma
             self.ui.barcodeLabel.setText(barCodeToPrint) # Päivitetään käyttöliittymän barcodeLabel
+            age = ssnToCheck.calculateAge() # Lasketaan ikä
+            ssnToCheck.getGender() # kutsutaan sukupuolen selvitys metodia
+            gender = ssnToCheck.gender # Luetaan ikä-ominaisuuden arvo oliosta
+            textToShow = f'Asiakas on {age} vuotias {gender}'
+            timeToShow = 10000
+            self.updateStatusbar(textToShow, timeToShow)
 
         # Jos se on muodostettu väärin näytetään virheilmoitus MessageBox-ikkunassa
         else:
             self.errorTitle = 'Henkilötunnus virheellinen!'
             self.errorText = ssnToCheck.errorMessage
-            self.ui.ssnLineEdit.setFocus()
             self.openErrorMsgBox(self.errorTitle, self.errorText)
+            
 
-    def beautyfyFirstName(self):
+    """ def beautyfyFirstName(self):
         firstName = self.ui.firstNameLineEdit_2.text()
         firstName = firstName.strip() # Poistetaan ylimääräiset välit
         firstName = firstName.title()
@@ -60,7 +68,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def beautyfyLastName(self):
         lastName = self.ui.LastNameLineEdit_2.text()
         lastName = lastName.strip().title()
-        self.ui.LastNameLineEdit_2.setText(lastName)
+        self.ui.LastNameLineEdit_2.setText(lastName) """
+    
+    def beautyfyElement(self, element):
+        elementText = element.text()
+        elementText = elementText.strip().title()
+        element.setText(elementText)
 
     # Aktivoidaan tulostuspainike
     def enablePrintButton(self):
@@ -75,6 +88,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         msgBox.setText(errorText)
         msgBox.setStandardButtons(QtWidgets.QMessageBox.Ok)
         msgBox.exec()
+
+    def updateStatusbar(self, textToShow, timeToShow=-1):
+        self.ui.statusbar.showMessage(textToShow, timeToShow)
 
 if __name__ == "__main__":
     # Luodaan sovellus ja käynnistetään se
