@@ -203,9 +203,9 @@ class NationalSSN:
 
             # Selvitetään onko parillinen (tyttö) vai pariton (poika)
             if number % 2 == 0:
-                self.gender = 'Nainen'
+                self.gender = 'nainen'
             else:
-                self.gender = 'Mies'
+                self.gender = 'mies'
 
     
 # MAIN KOKEILUJA VARTEN (Poista, kun ei enää tarvita)
